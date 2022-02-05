@@ -1,0 +1,103 @@
+-- A SELECT statement that returns a single row with these columns.
+Select count(customer_id), min(stay_credits_earned) as min_credits, max(stay_credits_earned) as max_credits
+From customer;
+
+-- A SELECT statement that returns one row for each customer that has a reservation with the following columns.
+Select customer_id, count(reservation_id) as number_of_reservation, min(check_in_date) as earliest_check_in_date
+From reservation
+Group by customer_id;
+
+-- A SELECT statement that pulls info about customers and summarizes it by city and state.   
+Select city, state, round(avg(stay_credits_earned)) as avg_credits_earned 
+From customer
+Group by city, state
+Order by state, avg_credits_earned desc;
+
+-- To know how many times each customer has stayed in a particular room at the South Austin location (i.e. Location_ID 1).  
+Select c.customer_id, c.last_name, rm.room_number, count(r.reservation_id) as stay_count
+From customer c inner join reservation r
+                on c.customer_id = r.customer_id
+                inner join reservation_details rd 
+                on r.reservation_id = rd.reservation_id
+                inner join room rm
+                on rd.room_id = rm.room_id
+Where rm.location_id = '1'
+Group by c.customer_id, c.last_name, rm.room_number
+Order by customer_id, stay_count desc;
+
+-- Duplicate of previous code, but only want to look at completed reservations and not in-progress or future reservations.
+Select c.customer_id, c.last_name, rm.room_number, count(r.reservation_id) as stay_count
+From customer c inner join reservation r
+                on c.customer_id = r.customer_id
+                inner join reservation_details rd 
+                on r.reservation_id = rd.reservation_id
+                inner join room rm
+                on rd.room_id = rm.room_id 
+Where rm.location_id = '1' and r.status = 'C'
+Group by c.customer_id, c.last_name, rm.room_number
+Having count(r.reservation_id) > 2;
+
+-- We want to know the anticipated number of guests by location and check_in_date.
+Select location_name, check_in_date, sum(number_of_guests)
+From location l inner join reservation r
+                on l.location_id = r.location_id
+Where check_in_date > sysdate
+Group by rollup(location_name, check_in_date);
+
+-- The cube operator shows the subtotals for all the possible combinations, whereas the rollup can create subtotals to only the levels needed. 
+
+-- Figures out which features exist at all 3 locations by joining tables, aggregating data, and using having clause.  
+Select count(l.location_id) as count_of_locations, f.feature_name, f.feature_id
+From location l inner join location_features_linking lfl 
+                on l.location_id = lfl.location_id
+                inner join features f
+                on lfl.feature_id = f.feature_id
+Group by f.feature_name,f.feature_id
+Having count(l.location_id) > 2;
+
+-- A subquery in a WHERE clause that uses the NOT IN keyword
+Select distinct c.customer_id, c.first_name, c.last_name, c.email
+From customer c left join reservation r on c.customer_id = r.customer_id
+Where reservation_id is null;
+
+Select distinct customer_id, first_name, last_name, email
+From customer
+Where customer_id not in (select customer_id
+                         from reservation
+                         );
+           
+-- We want to know all the customers that have earned more than the average number of stay credits.          
+Select first_name, last_name, email, phone, stay_credits_earned 
+From customer 
+Where stay_credits_earned > (select avg(stay_credits_earned)
+                            from customer
+                            )
+Order by stay_credits_earned desc;
+
+-- A query that returns four columns: city, state, the sum of stay_credits_earned (with an alias of total_earned), and the sum of stay_credits_used (with an alias of total_used statement). 
+Select city, state, total_earned - total_used as credits_remaining
+From (select city, state, sum(stay_credits_earned) as total_earned, sum(stay_credits_used) as total_used
+     from customer
+     group by city, state)
+Order by credits_remaining desc;
+
+-- We want to know who is going to be staying in a room that hasn’t been used much.  We define a room that hasn’t been used much, as a room that has been reserved less than 5 times
+Select r.confirmation_nbr, r.date_created, r.check_in_date, r.status, rd.room_id
+From reservation_details rd JOIN reservation r
+                            ON rd.reservation_id = r.reservation_id
+Where status <> 'C' and rd.room_id in (select room_id
+                                      from reservation_details
+                                      group by room_id
+                                      having count(room_id) < 5);
+                 
+-- We want to know which customers that are using Mastercard (i.e. MSTR) have only made a single reservation because Mastercard users will get a special $10 credit on their cards on their first stay at our hotel.
+Select cardholder_first_name, cardholder_last_name, card_number, expiration_date, cc_id
+From customer_payment cp JOIN 
+                               (select customer_id, count(reservation_id)
+                               from reservation
+                               where status = 'C'
+                               group by customer_id
+                               having count(reservation_id) = 1
+                               ) sub
+                         ON cp.customer_id = sub.customer_id                     
+Where card_type = 'MSTR';
