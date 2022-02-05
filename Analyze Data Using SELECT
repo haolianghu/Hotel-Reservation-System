@@ -1,0 +1,92 @@
+-- A SELECT statement that returns the following columns from the Customer_Payment table: Cardholder first name, cardholder last name, the card type, and the card expiration date.  
+Select CARDHOLDER_FIRST_NAME, CARDHOLDER_LAST_NAME, CARD_TYPE, EXPIRATION_DATE
+From CUSTOMER_PAYMENT
+Order By EXPIRATION_DATE;
+
+-- A SELECT statement that returns one column from the Customer table named customer_full_name that combines the first_name and last_name columns.
+Select FIRST_NAME || ' ' || LAST_NAME as customer_full_name
+From Customer
+Where Substr(FIRST_NAME, 1, 1) in ('A', 'B', 'C')
+Order By LAST_NAME desc;
+
+-- A SELECT statement that returns these columns from Reservation: customer_id, confirmation_nbr, date_created, check_in_date, and number_of_guests. Returned only the rows for reservations that have a status of “upcoming” that have check_in_dates that are today or in the future but only for this year.  
+Select customer_id, confirmation_nbr, date_created, check_in_date, number_of_guests
+From Reservation
+Where status = 'U' and check_in_date <= '31-Dec-21' and check_in_date >= sysdate;
+
+-- Created a duplicate of the previous query but this time update the WHERE clause to use the BETWEEN operator.
+Select customer_id, confirmation_nbr, date_created, check_in_date, number_of_guests
+From Reservation
+Where status = 'U' and check_in_date between sysdate and '31-Dec-21';
+
+-- Proof that the previous two sections of coded resulted in the same results.
+Select customer_id, confirmation_nbr, date_created, check_in_date, number_of_guests
+From Reservation
+Where status = 'U' and check_in_date < '31-Dec-21' and check_in_date >= sysdate
+Minus
+Select customer_id, confirmation_nbr, date_created, check_in_date, number_of_guests
+From Reservation
+Where status = 'U' and check_in_date between sysdate and '31-Dec-21';
+
+-- A SELECT statement that returns these column names and data from the Reservation table. Filtered the query to only show completed reservations (i.e. status = ‘C’). 
+Select customer_id, location_id, check_out_date - check_in_date as length_of_stay
+From Reservation
+Where status = 'C' and rownum <= 10
+Order by length_of_stay desc, customer_id;
+
+-- A SELECT statement that returns the first_name, last_name, email from Customer and also a fourth column called credits_available.  
+Select first_name, last_name, email, STAY_CREDITS_EARNED - STAY_CREDITS_USED as credits_available
+From Customer
+Where STAY_CREDITS_EARNED - STAY_CREDITS_USED >= 10
+Order by credits_available;
+
+-- A SELECT statement that returns the first, middle, and last name of a customer’s payment profile on Customer_Payment.
+Select CARDHOLDER_FIRST_NAME, CARDHOLDER_MID_NAME, CARDHOLDER_LAST_NAME
+From CUSTOMER_PAYMENT
+Where CARDHOLDER_MID_NAME is not null
+Order by 2 , 3;
+
+-- Used the DUAL table to write a SELECT statement that uses SYSDATE function.
+Select 
+sysdate as today_unformatted, to_char(sysdate, 'MM/DD/YYYY') as today_formatted, 25 as Credits_Earned, 
+25 / 10 as Stays_Earned, floor(25/10) as Redeemable_stays, round(25/10) as Next_Stay_to_earn
+From dual;
+
+-- A SELECT statement that pulls Reservation records for all reservations that are completed (i.e. status of C) for location 2. 
+Select Customer_id, Location_id, CHECK_OUT_DATE - CHECK_IN_DATE as length_of_stay
+From Reservation
+Where status = 'C' and location_id = 2
+Order by length_of_stay desc, Customer_id
+Fetch First 20 Rows Only;
+
+-- Pull all customers and their reservations.  Filter data to only show completed reservations (i.e. status is C).  
+Select c.first_name, c.last_name, r.confirmation_nbr, r.date_created, r.check_in_date, r.check_out_date
+From Customer c inner join Reservation r on c.customer_id = r.customer_id
+Where Status = 'C'
+Order by c.customer_id, check_out_date desc;
+
+-- A query that joins matching records between the following tables (Customer, Reservation, Reservation_Details, and Room) so we can understand what rooms customers are staying in.  
+Select FIRST_NAME || ' ' || LAST_NAME as Name, rm.Location_ID, Confirmation_Nbr, Check_in_date, Room_number
+From Customer c Inner Join Reservation r on c.customer_id = r.customer_id
+                Inner Join Reservation_details rd on r.reservation_id = rd.reservation_id
+                Inner Join Room rm on rd.room_id = rm.room_id
+Where status = 'U' and STAY_CREDITS_EARNED > 40;
+
+-- A query that returns any customers in our system’s customer table that have never had a reservation.  
+Select first_name, last_name, confirmation_nbr, date_created, check_in_date, check_out_date 
+From Customer c Left Join Reservation r on c.customer_id = r.customer_id
+Where r.reservation_id is null;
+
+-- Used the UNION operator to generate a result set consisting of four columns from the Customer table.
+Select '1-Gold Member' as Status_level, First_name, Last_name, Email, Stay_Credits_earned
+From Customer
+Where STAY_CREDITS_EARNED < 10 
+Union
+Select '2-Platinum Member' as Status_level, First_name, Last_name, Email, Stay_Credits_earned
+From Customer
+Where STAY_CREDITS_EARNED >= 10 and STAY_CREDITS_EARNED < 40
+Union
+Select '3-Diamond Club' as Status_level, First_name, Last_name, Email, Stay_Credits_earned
+From Customer
+Where STAY_CREDITS_EARNED >= 40
+Order by 1, 3;
