@@ -1,0 +1,242 @@
+Drop Table Reservation_Details;
+Drop Table Customer_Payment;
+Drop Table Reservation;
+Drop Table Customer;
+Drop Table Location_Features_Linking;
+Drop Table Room;
+Drop Table Location;
+Drop Table Features;
+Drop Sequence payment_id_seq;
+Drop SEQUENCE reservation_id_seq;
+Drop SEQUENCE location_id_seq;
+Drop SEQUENCE feature_id_seq;
+Drop SEQUENCE customer_id_seq;
+--This section drops all the tables and sequences.
+
+
+
+
+Create table Customer
+(
+Customer_ID         number(6)                   primary key,
+First_Name          varchar(15)                 not null,
+Last_Name           varchar(15)                 not null,
+Email               varchar(30)                 not null unique,
+Phone               char(12)                    not null,
+Address_Line_1      varchar(50)                 not null,
+Address_Line_2      varchar(50)                 null,
+City                varchar(15)                 not null,
+State               char(2)                     not null,
+Zip                 char(5)                     not null,
+Birthdate           date                        null,
+Stay_Credits_Earned number(5)       default 0   not null,
+Stay_Credits_Used   number(5)       default 0   not null,
+Constraint Credits_ck                           check (Stay_Credits_Used <= Stay_Credits_Earned),
+Constraint email_length_check                   check (length(Email)>7)
+);
+--This section creates the customer table, which includes all the information regarding the customers. hh27683
+
+Create table Customer_Payment
+(
+Payment_ID              number(5)                                       primary key,
+Customer_ID             number(6) references Customer(Customer_ID)      not null unique,
+Cardholder_First_Name   varchar(15)                                     not null,
+Cardholder_Mid_Name     varchar(15)                                     null,
+Cardholder_Last_Name    varchar(15)                                     not null,
+CardType                char(4)                                         not null,
+CardNumber              varchar(16)                                     not null,
+Expiration_Date         date                                            not null,
+CC_ID                   number(4)                                       not null,
+Billing_Address         varchar (100)                                   not null,
+Billing_City            varchar (15)                                    not null,
+Billing_State           char(2)                                         not null,
+Billing_Zip             char(5)                                         not null
+);
+--This section creates the customer payment table, which includes all the information for customers' payments and payment methods. hh27683
+
+Create table Location
+(
+Location_ID             number(5)               primary key,
+Location_Name           varchar(20)             not null unique,
+Adress                  varchar(100)            not null,
+City                    varchar (15)            not null,
+State                   char(2)                 not null,
+Zip                     char(5)                 not null,
+Phone                   char(12)                not null,
+URL                     varchar(100)            not null
+);
+
+Create table Reservation
+(
+Reservation_ID         number(5)                                       primary key,
+Customer_ID            number(6) references Customer(Customer_ID)      not null,
+Location_ID            number(5) references Location(Location_ID)      not null,
+Confirmation_Nbr       char(8)                                         not null unique,
+Date_Created           date             default sysdate                not null,
+Check_In_Date          date                                            not null,
+Check_Out_Date         date                                            null,
+Status                 char(1)                                         not null             check (Status = 'U' or Status = 'I' or Status = 'C' or Status = 'N' or Status = 'R'),
+Number_of_Guests       number(2)                                       not null,
+Reservation_Total      number(4)                                       not null,
+Discount_Code          varchar(8)                                      null,
+Customer_Rating        number(2)                                       null,
+Notes                  varchar(200)                                    null
+);
+--This section creates the reservations table, which includes all the information regarding customers' reservations. hh27683
+
+Create Table Room
+(
+Room_ID             number(5)                                       primary key,
+Location_ID         number(5) references Location(Location_ID)      not null,
+Room_Number         number(5)                                       not null,
+Floor               varchar(2)                                      not null,
+Room_Type           char(1)                                         not null            check (Room_Type='D' or Room_Type='Q' or Room_Type='K' or Room_Type='S' or Room_Type='C'),
+Square_Footage      number(4)                                       not null,
+Max_People          number(1)                                       not null,
+Weekday_Rate        number(4)                                       not null,
+Weekend_Rate        number(4)                                       not null
+);
+--This section creates the room table, which includes information regarding all the rooms at all of the locations. hh27683
+
+Create table Reservation_Details
+(
+Reservation_ID      number(5),
+Room_ID             number(5),
+Constraint Reservation_Details_pk primary key(Reservation_ID, Room_ID),
+Constraint Reservation_Details_fk1 foreign key (Reservation_ID) references Reservation(Reservation_ID),
+Constraint Reservation_Details_fk2 foreign key (Room_ID) references Room(Room_ID)
+);
+--Since room and reservation have a many to many relationship, a linking table is required. hh27683 
+--This section creates the linking table for reservation and room. hh27683
+--Details regarding reservations such as which rooms are reserved can be seen using this table. hh27683
+
+Create table Features
+(
+Feature_ID          number(5)           primary key,
+Feature_Name        varchar(15)         not null unique
+);
+--This section creates the features table that lists out all the possible features for a hotel. hh27683
+
+Create Table Location_Features_Linking
+(
+Location_ID         number(5),
+Feature_ID          number(5),
+Constraint Location_Features_Linking_pk primary key(Location_ID, Feature_ID),
+Constraint Location_Features_Linking_fk1 foreign key (Location_ID) references Location(Location_ID),
+Constraint Location_Features_Linking_fk2 foreign key (Feature_ID) references Features(Feature_ID)
+);
+--Since location and features have a many to many relationship, a linking table is required. hh27683
+--This section creates the linking table for location and features. hh27683
+--Details regarding the features of hotels at different locations can be seen using this table. hh27683
+
+CREATE SEQUENCE payment_id_seq
+START WITH 1;
+--Creates sequence for payment id starting at 1, incrementing by 1. hh27683
+CREATE SEQUENCE reservation_id_seq
+START WITH 1;
+--Creates sequence for reservation id starting at 1, incrementing by 1. hh27683
+CREATE SEQUENCE location_id_seq
+START WITH 1;
+--Creates sequence for location id starting at 1, incrementing by 1. hh27683
+CREATE SEQUENCE feature_id_seq
+START WITH 1;
+--Creates sequence for feature id starting at 1, incrementing by 1. hh27683
+CREATE SEQUENCE customer_id_seq
+START WITH 100001;
+--Creates sequence for customer id starting at 100001, incrementing by 1. hh27683
+
+
+
+
+INSERT INTO Location 
+VALUES (location_id_seq.NEXTVAL, 'South Congress', '1122 Alpine Dr', 'Austin', 'TX', '78705', '469-781-2220', 'www.southcongress.com');
+INSERT INTO Location 
+VALUES (location_id_seq.NEXTVAL, 'The East 7th Lofts', '8304 Barber Oak Dr', 'Austin', 'TX', '78725', '469-353-1745', 'www.theeast7th.com');
+INSERT INTO Location 
+VALUES (location_id_seq.NEXTVAL, 'Balcones Canyonlands', '4676 Thanksgiving Ln', 'Marble Falls', 'TX', '78734', '469-565-3345', 'www.balconescanyonlands.com');
+Commit;
+--Insert 3 hotels in to the location table. hh27683
+
+INSERT INTO Room 
+VALUES (1, 1, '10001', '1', 'D', '300', '2', 75, 100);
+INSERT INTO Room 
+VALUES (2, 1, '20001', '2', 'Q', '400', '2', 85, 110);
+INSERT INTO Room 
+VALUES (3, 2, '10002', '1', 'D', '350', '2', 65, 90);
+INSERT INTO Room 
+VALUES (4, 2, '20002', '2', 'Q', '450', '2', 85, 115);
+INSERT INTO Room 
+VALUES (5, 3, '10003', '1', 'D', '275', '2', 75, 120);
+INSERT INTO Room 
+VALUES (6, 3, '20003', '2', 'Q', '375', '2', 85, 114);
+Commit;
+--Insert 2 rooms in to each hotel location. hh27683
+
+INSERT INTO Features 
+VALUES (feature_id_seq.NEXTVAL, 'Free Breakfast');
+INSERT INTO Features 
+VALUES (feature_id_seq.NEXTVAL, 'Swimming Pool');
+INSERT INTO Features 
+VALUES (feature_id_seq.NEXTVAL, 'Gym');
+Commit;
+--Insert 3 features in to the features table. hh27683
+
+INSERT INTO location_features_linking 
+VALUES (1, 1);
+INSERT INTO location_features_linking 
+VALUES (1, 2);
+INSERT INTO location_features_linking 
+VALUES (2, 3);
+INSERT INTO location_features_linking 
+VALUES (3, 1);
+Commit;
+--Matching hotels with their features. One of the hotels has 2 features, while the other ones only have 1 feature each. hh27683
+
+INSERT INTO Customer
+VALUES (customer_id_seq.NEXTVAL, 'Haoliang', 'Hu', 'hh27683@utexas.edu', '468-353-2220', '2101 Rio Grande St', '#11009A', 'Austin', 'TX', '78705', to_date('21-07-2001','DD/MM/YYYY'), 0, 0);
+INSERT INTO Customer
+VALUES (customer_id_seq.NEXTVAL, 'Jake', 'Medina', 'jmedina@utexas.edu', '469-778-2320', '2102 Rio Grande St', '#11009B', 'Austin', 'TX', '78705', date '2001-05-24', 0, 0);
+Commit;
+--Creates 2 customers in the customer table. hh27683
+
+INSERT INTO Customer_Payment
+--!!Mid name null?
+VALUES (payment_id_seq.NEXTVAL, '100001', 'Haoliang', Null, 'Hu', 'Visa', '4185490899439733', date '2024-05-01', '334', '2101 Rio Grande St #11009A', 'Austin', 'TX', '78705');
+INSERT INTO Customer_Payment
+VALUES (payment_id_seq.NEXTVAL, '100002', 'Jake', 'Robert', 'Medina', 'Visa', '3546456788973455', date '2023-01-01', '909', '2102 Rio Grande St #11009B', 'Austin', 'TX', '78705');
+Commit;
+--Adds the payment method for the 2 customers. hh27683
+
+INSERT INTO Reservation
+VALUES (reservation_id_seq.NEXTVAL, '100001', '1', '1A4F8G9D', date'2021-04-27' , date '2021-05-25', date '2021-05-27', 'C', '2', 300, '46H88569', Null, Null);
+INSERT INTO Reservation
+VALUES (reservation_id_seq.NEXTVAL, '100002', '3', '1B4F4H8G', date'2021-06-23' , date '2021-07-01', date '2021-07-02', 'U', '2', 320, '14D34H89', Null, Null);
+Commit;
+--Insert the reservations in to the reservation table. hh27683
+
+INSERT INTO Reservation_Details
+VALUES (1, 1);
+INSERT INTO Reservation_Details
+VALUES (2, 5);
+Commit;
+--Matching the reservations which the corresponding room numbers in to the reservation details table. hh27683
+
+
+
+
+CREATE INDEX Reservation_CustomerID_ix
+ON Reservation (Customer_ID);
+--Creates index for FK Customer_ID in the Reservation table. hh27683    
+CREATE INDEX Reservation_LocationID_ix
+ON Reservation (Location_ID);
+--Creates index for FK Location_ID in the Reservation table. hh27683
+CREATE INDEX Room_LocationID_ix
+ON Room (Location_ID);
+--Creates index for FK Location_ID in the Room table. hh27683
+CREATE INDEX Customer_FullName_ix
+ON Customer (First_Name, Last_Name);
+--Creates index for customers' first names and last names since they are often used together in searches. hh27683
+Create INDEX Reservation_ReservationTotal_ix
+ON Reservation (Reservation_Total DESC);
+--Creates index for reservation total sorted in descending order. hh27683
+--Note, the FK Customer_ID for the Customer_Payment table does not need an index, since it already has an index due to its unique constraint. hh27683
