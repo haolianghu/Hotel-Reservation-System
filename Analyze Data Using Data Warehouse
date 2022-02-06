@@ -35,7 +35,7 @@ from CUSTOMER_ACQUISITION;
 
 Select * from customer_acquisition_view;
 
--- Creates a procedure called customer_etl_proc
+-- Creates a procedure called customer_etl_proc.
 create or replace PROCEDURE customer_etl_proc 
 AS
 BEGIN
@@ -85,7 +85,7 @@ End;
 
 call customer_etl_proc(); 
 
---To test if the ETL procedure works
+--To test if the ETL procedure works.
 /*
 insert into CUSTOMER_ACQUISITION
 values (24, 'Jack', 'Hu', 'haolianghu@gmail.com', '(469)781-2220', '78705', '20');
