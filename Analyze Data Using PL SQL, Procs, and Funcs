@@ -1,0 +1,122 @@
+-- A script that prompts the user to enter a customer ID and dynamically use that input to pull the count of reservations for the customer ID the user entered. 
+-- If the count is greater than 15, then the block will display a message that says, “The customer has placed more than 15 reservations.” 
+-- Otherwise, the block output will say “The customer has placed 15 or fewer reservations.” 
+Declare 
+count_reservations number;
+customer_id_var number := &customer_id;
+
+Begin 
+Select count(RESERVATION_ID)
+INTO count_reservations
+From reservation
+where customer_id = customer_id_var;
+
+If count_reservations > 15 then 
+dbms_output.put_line('The customers with customer ID: ' || customer_id_var || ' has placed more than 15 reservations.');
+else
+dbms_output.put_line('The customers with customer ID: ' || customer_id_var || ' has placed 15 or fewer reservations.');
+End if;
+
+End; 
+/
+
+-- A named procedure called insert_customer that allows user to insert a new customer by passing in customer ID, first name, last name, email, phone, address_line_1, city, state, and zip. 
+Create or replace procedure insert_customer
+(
+    FIRST_NAME_param customer.first_name %type,
+    LAST_NAME_param customer.last_name %type,
+    EMAIL_param customer.last_name %type,
+    PHONE_param customer.phone %type,
+    ADDRESS_LINE_1 customer.address_line_1 %type,
+    CITY_param customer.city %type,
+    STATE_param customer.state %type,
+    ZIP_param customer.zip %type
+)
+
+As
+
+Begin
+    Insert into customer values (CUSTOMER_ID_SEQ.nextval, FIRST_NAME_param, LAST_NAME_param, EMAIL_param, PHONE_param, ADDRESS_LINE_1, null, CITY_param, 
+                                 STATE_param, ZIP_param, null, null, null);
+    Commit;
+
+Exception
+When others then 
+Rollback;
+        
+End;
+/
+
+-- Tests the procedure created from the previous section of code
+CALL insert_customer ('Joseph', 'Lee', 'jo12@yahoo.com', '773-222-3344', 'Happy street', 'Chicago', 'Il', '60602');
+
+-- A script that uses an anonymous block of PL/SQL code that uses a bulk collect to capture a list of available features that begin with the letter P. 
+Declare 
+Type features_table is table of varchar2(50);
+hotel_features features_table;  
+
+Begin 
+Select feature_name 
+Bulk collect into hotel_features
+From features
+Where feature_name like 'P%'
+Order by feature_name;
+
+For i in 1..hotel_features.count loop
+dbms_output.put_line ('Hotel feature ' || i || ': ' || hotel_features(i));
+End loop;
+
+End;
+/
+
+-- A more complex version of the previous script that uses a cursor to capture the location name, city, and feature name. 
+-- Prompts the user for a city and then change the outputted list to output the location name, city, and feature name for that city.
+Declare 
+        city_input_var varchar(30) := &City;
+        
+        Cursor hotel_features_cursor is
+        Select l.location_name, l.city, f.feature_name
+        From features f join location_features_linking lf on f.feature_id = lf.feature_id
+                        join location l on lf.location_id = l.location_id
+        Order by l.location_name, l.city, f.feature_name;
+        
+        hotel_features_cursor_row  hotel_features_cursor%ROWTYPE;
+        
+Begin   
+
+For hotel_features_cursor_row in hotel_features_cursor loop
+    If (hotel_features_cursor_row.city = city_input_var) then
+    dbms_output.put_line (hotel_features_cursor_row.location_name || ' in ' || hotel_features_cursor_row.city || ' has features: ' || hotel_features_cursor_row.feature_name);
+    End if;
+End loop;
+
+End;
+/
+
+-- Creates a function called hold_count that returned the total number of rooms that a customer has reserved when it is passed a customer_id. 
+Create or replace function hold_count 
+(
+    customer_id_param number
+)
+Return number
+
+AS
+reservation_count_var number;
+
+Begin 
+Select count(reservation_id) 
+Into reservation_count_var
+From reservation
+Where customer_id = customer_id_param;
+
+Return reservation_count_var;
+
+End;
+/
+
+--Tests the function created in the previous section of code.
+select customer_id, hold_count(customer_id)  
+from reservation
+group by customer_id
+order by customer_id;
+
