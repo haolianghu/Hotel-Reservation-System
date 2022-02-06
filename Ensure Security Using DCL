@@ -1,0 +1,39 @@
+-- There are three main subjects: admins, clerks, and customers.
+-- SQL code to Grant the appropriate (object) privileges to the roles.
+Grant select, update on customer to customers;
+Grant select, insert, update, delete on customer_payment to customers;
+Grant select, insert, update on reservation to customers;
+
+Grant select, insert, update on customer to clerks;
+Grant select, insert, update on customer_payment to clerks;
+Grant select, insert, update, delete on reservation to clerks;
+Grant select, insert, update, delete on reservation_details to clerks;
+
+Grant select, insert, update on customer to admins;
+Grant select, insert, update, delete on customer_payment to admins;
+Grant select, insert, update, delete on reservation to admins;
+Grant select, insert, update, delete on reservation_details to admins;
+
+-- SQL code to Revoke all the privileges from the roles
+Revoke all on customer from customers;
+Revoke all on customer_payment from customers;
+Revoke all on reservation from customers;
+Revoke all on reservation_details from customers;
+
+Revoke all on customer from clerks;
+Revoke all on customer_payment from clerks;
+Revoke all on reservation from clerks;
+Revoke all on reservation_details from clerks;
+
+Revoke all on customer from admins;
+Revoke all on customer_payment from admins;
+Revoke all on reservation from admins;
+Revoke all on reservation_details from admins;
+
+-- Front Desk clerks should be able to see all fields on customer except email, address, and zip and only the name and card type on the payments table.  
+-- This statement will create a view called customer_clerk_view that pulls all columns from the Customer and Customer_Payments tables except for the aforementioned fields.
+Create or replace view customer_clerk_view as
+Select c.customer_id, c.first_name, c.last_name, c.phone, c.city, c.state, c.birthdate, c.stay_credits_earned, c.stay_credits_used, cp.cardholder_first_name, cp.cardholder_mid_name, cp.cardholder_last_name, cp.CardType
+From customers c join customer_payment cp on c.customer_id = cp.customer_id;
+Grant select on customer_clerk_view to clerks;
+
