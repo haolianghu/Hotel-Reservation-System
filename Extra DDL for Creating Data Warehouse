@@ -1,0 +1,170 @@
+-------------------------------------------
+-- drop tables and sequences
+-------------------------------------------
+--drop tables
+drop table customer;
+drop table customer_acquisition;
+
+---- IF needed - drop table customer_dw;
+--DROP TABLE customer_dw;
+--DROP TABLE customers_dw;  --in case people spelled it wrong
+
+----Drop sequences
+drop sequence customer_id_seq;
+drop sequence customer_acquisition_id_seq;
+ 
+-------------------------------------------
+-- CREATE sequences 
+-------------------------------------------
+-- CREATE SEQUENCE FOR Customer_id
+create sequence customer_id_seq 
+start with 1 increment by 31;
+
+ -- create customer_acquisition_id_seq sequence
+CREATE SEQUENCE customer_acquisition_id_seq
+START WITH 1 INCREMENT BY 1;
+
+-------------------------------------------
+-- CREATE tables 
+-------------------------------------------
+create table customer(
+    customer_id             number          default customer_id_seq.nextval       primary key,
+    first_name              varchar(100)    not null,
+    last_name               varchar(100)    not null,
+    email                   varchar(100)    not null        unique,
+    phone                   char(12)        not null,
+    address_line_1          varchar(100)    not null,
+    address_line_2          varchar(100),
+    city                    varchar(100)    not null,
+    state                   char(2)         not null,
+    zip                     char(5)         not null,
+    birthdate               date,
+    stay_credits_earned     number          default 0,
+    stay_credits_used       number          default 0,       
+    check (stay_credits_used <= stay_credits_earned),
+    constraint email_length_check check (length(email) >= 7)
+); 
+ 
+-----------create table Prospective_Users
+CREATE TABLE customer_acquisition (
+    acquired_customer_id  NUMBER          default customer_acquisition_id_seq.NEXTVAL      PRIMARY KEY,
+    CA_First_Name        VARCHAR(40)     NOT NULL,
+    CA_Last_Name         VARCHAR(50)     NOT NULL,
+    CA_Email             VARCHAR(50)     UNIQUE      NOT NULL,
+    CA_Phone             CHAR(13)        NOT NULL,
+    CA_zip_code          CHAR(5)         NOT NULL,
+    CA_credits_remaining NUMBER         
+);
+
+-------------------------------------------------------------
+-- SEED DATA
+-------------------------------------------------------------
+SET DEFINE OFF;
+ 
+
+--INSERT current customer records;
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (1,'Jamill','Kemm','JKemm@gmail.com','555-263-4329','9 Burrows Avenue','Apt 1B','San Antonio','TX','75897',to_date('08-DEC-94','DD-MON-RR'),1,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (2,'Jefferey','Kosiada','JKosiada@yahoo.com','555-263-5955','3 Iowa Street',null,'Shreveport','LA','79024',to_date('25-OCT-97','DD-MON-RR'),15,10);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (3,'Joline','Gloyens','JG966@gmail.com','555-263-5955','6795 Graedel Street','B2','Syracuse','NY','10005',to_date('19-APR-78','DD-MON-RR'),1,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (4,'Kary','Klimkowski','hookemfan192@hyper.net','144-402-5732','14 Bluejay Crossing',null,'Spring','TX','78267',to_date('06-MAR-78','DD-MON-RR'),0,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (5,'Lana','Eddison','LEddison@gmail.com','555-263-9515','64 Calypso Pass','Unit C','Austin','TX','76738',to_date('18-MAR-97','DD-MON-RR'),7,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (6,'Laure','Chatin','LC194@yahoo.com','555-263-8273','90 Logan Hill',null,'Dallas','TX','77148',to_date('13-NOV-82','DD-MON-RR'),1,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (7,'Leighton','Breawood','LB752@gmail.com','555-263-2928','7 Welch Junction',null,'Houston','TX','76233',to_date('06-NOV-86','DD-MON-RR'),1,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (8,'Lila','Weightman','WeightmanL1@hotmail.com','603-623-3885','1494 Mcguire Street',null,'Jamaica','NY','10020',to_date('31-AUG-00','DD-MON-RR'),5,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (9,'Linnell','Cranmere','LC697@yahoo.com','555-263-4450','30 Crescent Oaks Terrace','Apt 5A','Houston','TX','77296',to_date('28-FEB-88','DD-MON-RR'),2,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (10,'Malory','Buttrum','malbuttrum@mail.net','555-263-1377','34 Hudson Lane',null,'El Paso','TX','77855',to_date('13-DEC-74','DD-MON-RR'),42,10);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (11,'Megan','Rotlauf','MRotlauf@gmail.com','830-131-1258','09756 Bashford Point',null,'Dallas','TX','78249',to_date('05-OCT-89','DD-MON-RR'),1,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (12,'Meggie','Christoffels','MC535@gmail.com','555-263-3029','38 Longview Point',null,'Houston','TX','76131',to_date('15-JUN-77','DD-MON-RR'),20,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (13,'Omero','Goomes','OGoomes@yahoo.com','555-263-8908','11 Fairfield Terrace',null,'Waco','TX','78488',to_date('20-NOV-82','DD-MON-RR'),2,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (14,'Oren','Darycott','orenlovescats@yahoo.com','143-498-8226','8 North Parkway',null,'Mesquite','TX','77265',to_date('10-MAR-72','DD-MON-RR'),36,20);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (15,'Roda','Devil','RD427@yahoo.com','652-718-7370','47196 Golf Park',null,'El Paso','TX','77927',to_date('05-MAR-73','DD-MON-RR'),2,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (16,'Rosalind','Joncic','RJoncic@gmail.com','555-263-2192','89 Lindbergh Point',null,'Austin','TX','76743',to_date('14-SEP-74','DD-MON-RR'),46,40);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (17,'Shirline','Laverock','shirlielou@gmail.com','783-625-7173','6 Cody Terrace','Unit A','Lake Charles','LA','79030',to_date('16-JUL-85','DD-MON-RR'),3,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (18,'Sidoney','Schellig','SS947@gmail.com','555-263-4967','039 Delladonna Parkway',null,'Lubbock','TX','77254',to_date('25-MAR-96','DD-MON-RR'),45,10);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (19,'Sue','Stonehouse','stonesthrow@hotmail.com','497-772-5452','294 Dennis Parkway',null,'Houston','TX','78068',to_date('19-AUG-79','DD-MON-RR'),2,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (20,'Tarra','Vaughton','tarrav99@mail.net','244-307-8888','7 Calypso Parkway','Unit 2','Waco','TX','77669',to_date('04-AUG-86','DD-MON-RR'),18,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (21,'Teresina','Nelle','TN870@yahoo.com','555-263-5415','480 Pierstorff Way',null,'Shreveport','LA','79024',to_date('26-SEP-00','DD-MON-RR'),1,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (22,'Thomas','Haslehurst','THaslehurst@gmail.com','555-263-3363','1560 Lake View Avenue',null,'Brooklyn','NY','10022',to_date('01-APR-80','DD-MON-RR'),2,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (23,'Zarah','Lockney','zlock99@hotmail.com','108-321-3682','0 Johnson Pass',null,'Amarillo','TX','76715',to_date('19-JUL-97','DD-MON-RR'),1,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (24,'Zelma','Reynalds','ZR675@gmail.com','555-263-8765','9691 Longview Street',null,'Baton Rouge','LA','79035',to_date('15-APR-92','DD-MON-RR'),36,10);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (25,'Zsa zsa','Chifney','ZChifney@yahoo.com','555-263-2553','0396 Lindbergh Pass','Apt 301','Houston','TX','78205',to_date('07-APR-78','DD-MON-RR'),1,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (26,'Blanch','Betchley','gosox99187@yahoo.com','394-710-5408','48 Cordelia Hill',null,'Garland','TX','78503',to_date('12-APR-78','DD-MON-RR'),42,30);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (27,'Nanine','Carlyon','NCarlyon@gmail.com','421-840-7968','40 Cherokee Way',null,'Albuquerque','NM','20482',to_date('21-FEB-80','DD-MON-RR'),21,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (28,'Wright','Avard','wrighta1212@hotmail.com','555-263-4146','00839 Kipling Street',null,'Abilene','TX','75841',to_date('18-DEC-88','DD-MON-RR'),14,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (29,'Appolonia','Kilmartin','AK878@gmail.com','300-206-2921','4 Center Plaza',null,'Oklahoma City','OK','73008',to_date('06-OCT-83','DD-MON-RR'),0,0);
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,ADDRESS_LINE_2,CITY,STATE,ZIP,BIRTHDATE,STAY_CREDITS_EARNED,STAY_CREDITS_USED) values (30,'Ayn','Style','AS932@yahoo.com','689-816-4304','63129 Ridgeway Trail','Suite 2','Staten Island','NY','10041',to_date('28-FEB-97','DD-MON-RR'),48,0);
+commit;
+
+
+
+----insert for book_club members
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Veronike', 'Gallamore', 'veronikegallamore@pmail.com',  '(504)884-6665','73949', 10);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Xenos', 'Brickdale', 'xenosbrickdale@pmail.com',  '(214)457-1891','73947', 4);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Aurie', 'Slinn', 'aurieslinn@pmail.com',  '(505)912-1449','73940', 64);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Buckie', 'Sugar', 'buckiesugar@pmail.com',  '(903)793-6971','73942', 2);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Dawna', 'Kalinovich', 'dawnakalinovich@pmail.com',  '(214)263-8212','73949', 40);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Glen', 'Bonett', 'glenbonett@pmail.com',  '(210)326-8811','73948', 0);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Marilyn', 'Gainor', 'marilyngainor@pmail.com',  '(210)223-3167','73946', 32);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Meredith', 'Burrel', 'meredithburrel@pmail.com',  '(817)760-9626','73948', 4);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Mikkel', 'Kilbane', 'mikkelkilbane@pmail.com',  '(713)761-9173','73945', 12);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Norton', 'Allibone', 'nortonallibone@pmail.com',  '(936)769-9284','73942', 6);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Orson', 'Boote', 'orsonboote@pmail.com',  '(903)184-1306','73948', 70);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Sydney', 'Mabb', 'sydneymabb@pmail.com',  '(915)905-4980','73943', 4);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Winne', 'Medcraft', 'winnemedcraft@pmail.com',  '(682)122-3915','73948', 36);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Alfonso', 'Gornall', 'alfonsogornall@pmail.com',  '(214)805-3861','73941', 2);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Hedda', 'Slorach', 'heddaslorach@pmail.com', '(501)381-9554','73948', 4);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Jobey', 'Gowdie', 'jobeygowdie@pmail.com', '(337)818-3072', '73940', 2);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Lazare', 'Dreamer', 'lazaredreamer@pmail.com', '(214)355-2569','73948', 52);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Lissie', 'de Juares', 'lissiede juares@pmail.com', '(682)740-5284','73944', 2);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Malanie', 'Greenside', 'malaniegreenside@pmail.com', '(832)748-9550','73945', 24);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Marketa', 'Scroggie', 'marketascroggie@pmail.com', '(936)652-7953','73943', 42);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Pauletta', 'Jurkowski', 'paulettajurkowski@pmail.com', '(405)687-2354','73948', 28);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Raven', 'Aspinal', 'ravenaspinal@pmail.com',  '(915)144-0876', '73946', 0);
+
+INSERT INTO customer_acquisition (CA_First_Name, CA_Last_Name, CA_Email, CA_Phone, CA_zip_code,CA_credits_remaining) 
+VALUES ('Stewart','Larking', 'stewartlarking@pmail.com',  '(601)668-7268','73941', 96);
+
+Commit;
