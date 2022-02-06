@@ -1,4 +1,4 @@
--- A SELECT statement that returns the following columns from the Customer_Payment table: Cardholder first name, cardholder last name, the card type, and the card expiration date.  
+-- A SELECT statement that returns the certain columns from the Customer_Payment table.  
 Select CARDHOLDER_FIRST_NAME, CARDHOLDER_LAST_NAME, CARD_TYPE, EXPIRATION_DATE
 From CUSTOMER_PAYMENT
 Order By EXPIRATION_DATE;
@@ -9,7 +9,8 @@ From Customer
 Where Substr(FIRST_NAME, 1, 1) in ('A', 'B', 'C')
 Order By LAST_NAME desc;
 
--- A SELECT statement that returns these columns from Reservation: customer_id, confirmation_nbr, date_created, check_in_date, and number_of_guests. Returned only the rows for reservations that have a status of “upcoming” that have check_in_dates that are today or in the future but only for this year.  
+-- A SELECT statement that returns certain columns from Reservation. 
+-- Returned only the rows for reservations that have a status of “upcoming” that have check_in_dates that are today or in the future but only for this year.  
 Select customer_id, confirmation_nbr, date_created, check_in_date, number_of_guests
 From Reservation
 Where status = 'U' and check_in_date <= '31-Dec-21' and check_in_date >= sysdate;
@@ -28,7 +29,7 @@ Select customer_id, confirmation_nbr, date_created, check_in_date, number_of_gue
 From Reservation
 Where status = 'U' and check_in_date between sysdate and '31-Dec-21';
 
--- A SELECT statement that returns these column names and data from the Reservation table. Filtered the query to only show completed reservations (i.e. status = ‘C’). 
+-- A SELECT statement that returns certain column names and data from the Reservation table. Filtered the query to only show completed reservations (i.e. status = ‘C’). 
 Select customer_id, location_id, check_out_date - check_in_date as length_of_stay
 From Reservation
 Where status = 'C' and rownum <= 10
@@ -46,12 +47,6 @@ From CUSTOMER_PAYMENT
 Where CARDHOLDER_MID_NAME is not null
 Order by 2 , 3;
 
--- Used the DUAL table to write a SELECT statement that uses SYSDATE function.
-Select 
-sysdate as today_unformatted, to_char(sysdate, 'MM/DD/YYYY') as today_formatted, 25 as Credits_Earned, 
-25 / 10 as Stays_Earned, floor(25/10) as Redeemable_stays, round(25/10) as Next_Stay_to_earn
-From dual;
-
 -- A SELECT statement that pulls Reservation records for all reservations that are completed (i.e. status of C) for location 2. 
 Select Customer_id, Location_id, CHECK_OUT_DATE - CHECK_IN_DATE as length_of_stay
 From Reservation
@@ -59,13 +54,14 @@ Where status = 'C' and location_id = 2
 Order by length_of_stay desc, Customer_id
 Fetch First 20 Rows Only;
 
--- Pull all customers and their reservations.  Filter data to only show completed reservations (i.e. status is C).  
+-- Pulls all customers and their reservations. Filters data to only show completed reservations (i.e. status is C).  
 Select c.first_name, c.last_name, r.confirmation_nbr, r.date_created, r.check_in_date, r.check_out_date
 From Customer c inner join Reservation r on c.customer_id = r.customer_id
 Where Status = 'C'
 Order by c.customer_id, check_out_date desc;
 
--- A query that joins matching records between the following tables (Customer, Reservation, Reservation_Details, and Room) so we can understand what rooms customers are staying in.  
+-- A query that joins matching records between the following tables (Customer, Reservation, Reservation_Details, and Room) 
+-- So we can understand what rooms customers are staying in.  
 Select FIRST_NAME || ' ' || LAST_NAME as Name, rm.Location_ID, Confirmation_Nbr, Check_in_date, Room_number
 From Customer c Inner Join Reservation r on c.customer_id = r.customer_id
                 Inner Join Reservation_details rd on r.reservation_id = rd.reservation_id
@@ -90,3 +86,54 @@ Select '3-Diamond Club' as Status_level, First_name, Last_name, Email, Stay_Cred
 From Customer
 Where STAY_CREDITS_EARNED >= 40
 Order by 1, 3;
+
+-- Same result as the above code but with CASE statement.
+Select 
+    Case 
+    When stay_credits_earned < 10 then '1-Gold Member'
+    When stay_credits_earned >= 10 and stay_credits_earned < 40 then '2-Platinum Member'
+    When stay_credits_earned >= 40 then '3-Diamond Club'
+    End as status_level,
+    first_name, last_name, email, stay_credits_earned
+From Customer
+Order by 1, 3;
+
+-- A query that retrieves a row for each future reservation.
+Select
+Reservation_ID,
+Customer_ID,
+'Checking in on ' || to_char(check_in_date, 'Day - ') || to_char(check_in_date, 'Mon dd, yyyy') as Arrival_date,
+'at ' || case location_id when 1 then 'South Congress' when 2 then 'East 7th Lofts' when 3 then 'Balcones Canyonlands' end as Location_name,
+nvl(notes, ' ') as Notes
+From reservation
+Where check_in_date > sysdate and status = 'U'
+Order By check_in_date;
+
+-- Once a month we want to send follow-up emails to people that have stayed with us. 
+-- To do this we pull a list of customer names who have a completed reservation within the past 30 days based on the check_out_date.
+Select
+substr(c.First_Name, 1, 1) || '. ' || upper(c.last_name) as Customer_Name, r.check_in_date, r.check_out_date, c.email
+From customer c inner join reservation r on c.customer_id = r.customer_id
+Where sysdate - check_out_date <= 30
+Order by check_out_date;
+
+-- A SELECT statement that returns reservations and customers for November 5th 2021 along with their anticipated total of that reservation.
+Select
+r. Reservation_ID,
+r. Customer_ID,
+'$' || rm.weekend_rate*1.1*2 as Anticipated_total
+From reservation r inner join reservation_details rd
+                   on r.reservation_id = rd.reservation_id
+                   inner join room rm
+                   on rd.room_id = rm.room_id
+Where check_in_date = to_date('05-Nov-2021');
+
+-- We’d like to have a list of customers with their redacted credit card number on file for customer service to have.  
+Select 
+c.first_name || ' ' || c.last_name as Customer_Name,
+cp.Card_Type,
+'****-****-****-' || substr(card_number, 13) as redacted_card_num
+From Customer c join customer_payment cp 
+                on c.customer_id = cp.customer_id
+Where Card_Type <> 'AMEX'
+Order by c.last_name;
