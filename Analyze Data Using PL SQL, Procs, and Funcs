@@ -119,4 +119,3 @@ select customer_id, hold_count(customer_id)
 from reservation
 group by customer_id
 order by customer_id;
-
