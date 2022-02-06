@@ -1,5 +1,5 @@
 # Hotel-Reservation-System
-The purpose of this code is to develop a hotel reservation system for a hotel. <br>
+The purpose of this code is to develop a hotel reservation system for a hotel using SQL. <br>
 DDL is used to create the database. <br>
 DML is used to update the database. <br>
 DCL is used tp ensure the security of the database. <br>
