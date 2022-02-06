@@ -1,0 +1,97 @@
+/*drop table customer_dw;
+drop view customer_view;
+drop view customer_acquisition_view;
+drop procedure customer_etl_proc;*/
+
+-- DDL script that produces a new table called customer_dw to serve as a data warehouse for the two groups of people. 
+Create table customer_dw
+(  data_source           Varchar(5),
+   customer_id           Number, 
+   first_name            Varchar(100), 
+   last_name             Varchar(100), 
+   email                 Varchar(100), 
+   phone                 Char(12), 
+   zip                   Char(5), 
+   credits_earned        Number, 
+   credits_used          Number,
+   constraint   pk_id_source  primary key (data_source, customer_id)
+);
+
+-- 2 create view statements that will format the data from the two tables in a unified, consistent format that matches the user structure in target customer_dw table. 
+Create or replace view customer_view
+as
+select 
+'CUST' as data_source, customer_id, first_name, last_name, email, phone, zip, stay_credits_earned as credits_earned, stay_credits_used as credits_used
+from Customer;
+
+Select * from customer_view;
+
+Create or replace view customer_acquisition_view
+as
+select 
+'AQUI' as data_source, ACQUIRED_CUSTOMER_ID as customer_id, CA_FIRST_NAME as first_name, CA_LAST_NAME as last_name, CA_EMAIL as email, 
+substr(CA_PHONE,2,3) || '-' || substr(CA_PHONE,6,13) as phone, CA_ZIP_CODE as zip, CA_CREDITS_REMAINING as credits_earned, 0 as credits_used
+from CUSTOMER_ACQUISITION;
+
+Select * from customer_acquisition_view;
+
+-- Creates a procedure called customer_etl_proc
+create or replace PROCEDURE customer_etl_proc 
+AS
+BEGIN
+
+--2 statements that will select the columns from the view and then insert them into the customer_dw table but only if the records don’t exist already in the data warehouse table.
+insert into customer_dw
+select cv.DATA_SOURCE, cv.CUSTOMER_ID, cv.FIRST_NAME, cv.LAST_NAME, cv.EMAIL, cv.PHONE, cv.ZIP, cv.CREDITS_EARNED, cv.CREDITS_USED
+from customer_view cv left join customer_dw dw
+on cv.customer_id = dw.customer_id
+and cv.data_source = dw.data_source
+where dw.customer_id is null;
+
+insert into customer_dw
+select cav.DATA_SOURCE, cav.CUSTOMER_ID, cav.FIRST_NAME, cav.LAST_NAME, cav.EMAIL, cav.PHONE, cav.ZIP, cav.CREDITS_EARNED/2, cav.CREDITS_USED
+from customer_acquisition_view cav left join customer_dw dw
+on cav.customer_id = dw.customer_id
+and cav.data_source = dw.data_source
+where dw.customer_id is null;
+
+-- 2 statements that will update the records on the customer_dw table with the latest name, email, phone, zip, or credits from the source views. 
+MERGE INTO customer_dw dw
+USING customer_view cv
+ON (dw.customer_id = cv.customer_id and dw.data_source = 'CUST')
+WHEN MATCHED THEN
+UPDATE SET  dw.FIRST_NAME = cv.FIRST_NAME, 
+            dw.LAST_NAME = cv.LAST_NAME,
+            dw.EMAIL = cv.EMAIL,
+            dw.PHONE = cv.PHONE,
+            dw.ZIP = cv.ZIP,
+            dw.CREDITS_EARNED = cv.CREDITS_EARNED,
+            dw.CREDITS_USED = cv.CREDITS_USED;
+            
+MERGE INTO customer_dw dw
+USING customer_acquisition_view cav
+ON (dw.customer_id = cav.customer_id and dw.data_source = 'AQUI')
+WHEN MATCHED THEN
+UPDATE SET  dw.FIRST_NAME = cav.FIRST_NAME, 
+            dw.LAST_NAME = cav.LAST_NAME,
+            dw.EMAIL = cav.EMAIL,
+            dw.PHONE = cav.PHONE,
+            dw.ZIP = cav.ZIP,
+            dw.CREDITS_EARNED = cav.CREDITS_EARNED/2,
+            dw.CREDITS_USED = cav.CREDITS_USED;
+
+End;
+/
+
+call customer_etl_proc(); 
+
+--To test if the ETL procedure works
+/*
+insert into CUSTOMER_ACQUISITION
+values (24, 'Jack', 'Hu', 'haolianghu@gmail.com', '(469)781-2220', '78705', '20');
+
+insert into CUSTOMER
+values (31, 'Haoliang', 'Hu', 'haolianghu@gmail.com', '469-781-2220', '1122 Alpine Dr', Null, 'Richardson', 'TX', '75080', '21-JUL-2001', '15', '7');
+
+call customer_etl_proc(); 
+*/
