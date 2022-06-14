@@ -7,7 +7,6 @@ drop table customer_acquisition;
 
 ---- IF needed - drop table customer_dw;
 --DROP TABLE customer_dw;
---DROP TABLE customers_dw;  --in case people spelled it wrong
 
 ----Drop sequences
 drop sequence customer_id_seq;
