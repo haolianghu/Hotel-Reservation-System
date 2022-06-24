@@ -1,22 +1,3 @@
-/*drop table customer_dw;
-drop view customer_view;
-drop view customer_acquisition_view;
-drop procedure customer_etl_proc;*/
-
--- DDL script that produces a new table called customer_dw to serve as a data warehouse for the two groups of people. 
-Create table customer_dw
-(  data_source           Varchar(5),
-   customer_id           Number, 
-   first_name            Varchar(100), 
-   last_name             Varchar(100), 
-   email                 Varchar(100), 
-   phone                 Char(12), 
-   zip                   Char(5), 
-   credits_earned        Number, 
-   credits_used          Number,
-   constraint   pk_id_source  primary key (data_source, customer_id)
-);
-
 -- 2 create view statements that will format the data from the two tables in a unified, consistent format that matches the user structure in target customer_dw table. 
 Create or replace view customer_view
 as
@@ -87,11 +68,11 @@ call customer_etl_proc();
 
 --To test if the ETL procedure works.
 /*
-insert into CUSTOMER_ACQUISITION
-values (24, 'Jack', 'Hu', 'haolianghu@gmail.com', '(469)781-2220', '78705', '20');
-
 insert into CUSTOMER
 values (31, 'Haoliang', 'Hu', 'haolianghu@gmail.com', '469-781-2220', '1122 Alpine Dr', Null, 'Richardson', 'TX', '75080', '21-JUL-2001', '15', '7');
+
+insert into CUSTOMER_ACQUISITION
+values (24, 'Jack', 'Hu', 'haolianghu@gmail.com', '(469)781-2220', '78705', '20');
 
 call customer_etl_proc(); 
 */
