@@ -1,4 +1,9 @@
 -- There are three main subjects: admins, clerks, and customers.
+-- The SQL code to create roles.
+Create role customers;
+Create role clerks;
+Create role admins;
+
 -- SQL code to Grant the appropriate (object) privileges to the roles.
 Grant select, update on customer to customers;
 Grant select, insert, update, delete on customer_payment to customers;
