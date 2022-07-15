@@ -19,7 +19,7 @@ drop sequence customer_acquisition_id_seq;
 create sequence customer_id_seq 
 start with 1 increment by 31;
 
- -- create customer_acquisition_id_seq sequence
+-- create customer_acquisition_id_seq sequence
 CREATE SEQUENCE customer_acquisition_id_seq
 START WITH 1 INCREMENT BY 1;
 
