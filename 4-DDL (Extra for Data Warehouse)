@@ -1,14 +1,14 @@
 -------------------------------------------
--- drop tables and sequences
+-- DROP tables and sequences
 -------------------------------------------
---drop tables
+---- Drop tables
 drop table customer;
 drop table customer_acquisition;
 
 ---- IF needed - drop table customer_dw;
 --DROP TABLE customer_dw;
 
-----Drop sequences
+---- Drop sequences
 drop sequence customer_id_seq;
 drop sequence customer_acquisition_id_seq;
  
