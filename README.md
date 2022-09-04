@@ -3,5 +3,5 @@ The purpose of this code is to develop a hotel reservation system for a hotel us
 DDL is used to create the database. <br>
 DCL is used to ensure the security of the database. <br>
 DML is used to inspect and update the database. <br>
-PL/SQL, functions, and procedures are used to analyze data, catch errors and ensure consistancy. <br>
-A data warehouse is created using ETL to help examine the data. <br>
+A data warehouse is created by performing ETL to ensure consistancy. <br>
+PL/SQL, functions, and procedures are used to analyze data, handle errors, and enhance efficiency. <br>
